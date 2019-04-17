@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <title>Страница пользователя</title>
+  </head>
+  <body>
+    <button id="button">Выйти</button>
+  	<script type="text/javascript">
+      var access_token = getCookie('access_token');
+      var name = [];
+      var id = getCookie('id');
+      $('#button').on('click', () =>
+      {
+        deleteAllCookies();
+        window.location.reload();
+      });
+      $.ajax({
+        type: 'GET',
+        url: 'https://api.vk.com/method/users.get?',
+        dataType: 'JSONP',
+        data:{
+          user_id: id,
+          access_token: access_token,
+          v: 5.52
+        },
+        success: (data) =>{
+          $('body').append(`<h2>Вы авторизованы как - ${data.response[0].first_name} ${data.response[0].last_name}.</h2>`);
+          console.log(data);
+          $.ajax({
+            type: 'GET',
+            url: 'https://api.vk.com/method/friends.search',
+            dataType: 'JSONP',
+            data:{
+              count: 5,
+              access_token: access_token,
+              v: 5.95
+            },
+            success:(data) =>{
+              $('body').append('<p>Список ваших друзей<p>')
+              for(let i = 0; i < 5; i++)
+              {
+                $('body').append(`<p>${data.response.items[i].first_name} ${data.response.items[i].last_name}<p>`);
+              }
+              console.log(name);
+            }
+          });
+        }
+      });
+
+      function deleteAllCookies() {
+          var cookies = document.cookie.split(";");
+
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = cookies[i];
+              var eqPos = cookie.indexOf("=");
+              var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+              document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+          }
+      }
+
+      function getCookie(name)
+      {
+       var matches = document.cookie.match(new RegExp(
+         "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+       ));
+       return matches ? decodeURIComponent(matches[1]) : undefined;
+      }
+
+  	</script>
+  </body>
+</html>
